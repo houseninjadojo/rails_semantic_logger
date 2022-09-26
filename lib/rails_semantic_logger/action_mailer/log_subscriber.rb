@@ -46,20 +46,20 @@ module RailsSemanticLogger
             h[:event_name]         = event.name
             h[:mailer]             = mailer
             h[:action]             = action
-            h[:message_id]         = event.payload[:message_id]
-            h[:perform_deliveries] = event.payload[:perform_deliveries]
-            h[:subject]            = event.payload[:subject]
-            h[:to]                 = event.payload[:to]
-            h[:from]               = event.payload[:from]
-            h[:bcc]                = event.payload[:bcc]
-            h[:cc]                 = event.payload[:cc]
+            h[:message_id]         = event.payload[:args][:message_id]
+            h[:perform_deliveries] = event.payload[:args][:perform_deliveries]
+            h[:subject]            = event.payload[:args][:subject]
+            h[:to]                 = event.payload[:args][:to]
+            h[:from]               = event.payload[:args][:from]
+            h[:bcc]                = event.payload[:args][:bcc]
+            h[:cc]                 = event.payload[:args][:cc]
             h[:date]               = date
             h[:duration]           = event.duration.round(2) if log_duration?
           end
         end
 
         def date
-          if date = event.payload[:date]
+          if date = event.payload[:args][:date]
             Time.parse(date).utc
           else
             nil
