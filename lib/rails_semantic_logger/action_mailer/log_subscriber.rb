@@ -5,7 +5,8 @@ module RailsSemanticLogger
   module ActionMailer
     class LogSubscriber < ::ActiveSupport::LogSubscriber
       def deliver(event)
-        message_id = event.payload[:message_id]
+        puts event
+        message_id = mail_args[:message_id]
         duration = event.duration.round(1)
         message = begin
          if event.payload[:perform_deliveries]
@@ -32,6 +33,10 @@ module RailsSemanticLogger
 
       private
 
+      def mail_args
+        event.payload[:args] || {}
+      end
+
       class EventFormatter
         def initialize(event:, log_duration: false)
           @event = event
@@ -47,20 +52,22 @@ module RailsSemanticLogger
             h[:event_name]         = event.name
             h[:mailer]             = mailer
             h[:action]             = action
-            h[:message_id]         = event.payload[:message_id]
+            h[:message_id]         = args[:message_id]
             h[:perform_deliveries] = event.payload[:perform_deliveries]
-            h[:subject]            = event.payload[:subject]
-            h[:to]                 = event.payload[:to]
-            h[:from]               = event.payload[:from]
-            h[:bcc]                = event.payload[:bcc]
-            h[:cc]                 = event.payload[:cc]
+            h[:subject]            = args[:subject]
+            h[:to]                 = args[:to]
+            h[:from]               = args[:from]
+            h[:bcc]                = args[:bcc]
+            h[:cc]                 = args[:cc]
             h[:date]               = date
             h[:duration]           = event.duration.round(2) if log_duration?
           end
         end
 
         def date
-          if date = event.payload[:date]
+          if event.payload[:date].respond_to?(:strftime)
+            event.payload[:date]
+          elsif event.payload[:date].is_a?(String)
             Time.parse(date).utc
           else
             nil
@@ -77,6 +84,10 @@ module RailsSemanticLogger
 
         def action
           event.payload[:action]
+        end
+
+        def args
+          event.payload[:args] || {}
         end
 
         def log_duration?
