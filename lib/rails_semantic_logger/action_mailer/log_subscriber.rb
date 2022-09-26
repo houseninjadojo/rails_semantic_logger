@@ -85,7 +85,7 @@ module RailsSemanticLogger
           if defined?(mailer.contantize.log_arguments?) && !mailer.contantize.log_arguments?
             ""
           else
-            JSON.pretty_generate(event.payload[:args].map { |arg| format(arg) })
+            JSON.pretty_generate(event.payload[:args].map { |arg| format(arg) }) if event.payload[:args].present?
           end
         end
 
