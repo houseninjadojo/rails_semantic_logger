@@ -6,7 +6,7 @@ module RailsSemanticLogger
     class LogSubscriber < ::ActiveSupport::LogSubscriber
       def deliver(event)
         puts event
-        message_id = (event.payload[:args] || {})[:message_id]
+        message_id = (event.payload[:args]&.first || {})[:message_id]
         duration = event.duration.round(1)
         message = begin
          if event.payload[:perform_deliveries]
@@ -83,7 +83,7 @@ module RailsSemanticLogger
         end
 
         def args
-          event.payload[:args] || {}
+          event.payload[:args]&.first || {}
         end
 
         def log_duration?
